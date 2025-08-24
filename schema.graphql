@@ -1,0 +1,29 @@
+type BondingCurveTransaction @entity {
+  id: ID!
+  blockNumber: Int!
+  timestamp: DateTime!
+  txHash: String!
+  type: TransactionType!
+  trader: String!
+  curveAddress: String!
+  tokenAmount: BigInt!
+  vstAmount: BigInt!
+  currentCost: BigInt!
+  eventTimestamp: BigInt!
+  taxPaid: BigInt # only for sells
+}
+
+enum TransactionType {
+  BUY
+  SELL
+}
+
+type VSTPrice @entity {
+  id: ID!
+  blockNumber: Int!
+  timestamp: DateTime!
+  txHash: String!
+  reserveUSDC: BigInt!
+  reserveVST: BigInt!
+  priceUSD: BigDecimal
+}
