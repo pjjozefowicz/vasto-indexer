@@ -4,20 +4,24 @@ A Squid indexer that tracks bonding curve transactions and VST token pricing. Th
 
 Dependencies: NodeJS v16 or newer, Git, Docker.
 
-## Setup
+## Local setup
 
-- Install Squid CLI:
+### Install Squid CLI:
 
 ```bash
 npm i -g @subsquid/cli
 ```
+
+The Squid CLI uses the `sqd` command and is intended for local development. It reads from `commands.json` which defines various commands for building, migrating, and running the indexer.
+
+### Set env variables
 
 - `LP_ADDRESS` - The VST/USDC LP contract address
 - `BONDING_CURVE_ADDRES` - The bonding curve contract address
 - `FROM_BLOCK` - Starting block number for indexing
 - `RPC_ENDPOINT` - Arbitrum RPC endpoint for fetching blockchain data
 
-## Run
+### Run locally with Squid CLI
 
 ```bash
 npm ci
@@ -25,15 +29,16 @@ npm ci
 sqd up
 # build the squid
 sqd build
-# start both the squid processor and the GraphQL server
-sqd run .
+# start the squid processor
+sqd process
 ```
 
-A GraphiQL playground will be available at [localhost:4350/graphql](http://localhost:4350/graphql).
+### Run with Docker Compose
 
-You can also start squid services one by one:
+You can also run both the database and indexer in Docker:
 
 ```bash
-sqd process
-sqd serve
+docker compose up
 ```
+
+This will start a PostgreSQL database and the squid processor in containers, automatically applying migrations and starting the indexer.

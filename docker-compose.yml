@@ -1,5 +1,3 @@
-version: "3"
-
 services:
   db:
     image: postgres:17
@@ -7,6 +5,21 @@ services:
       POSTGRES_DB: squid
       POSTGRES_PASSWORD: postgres
     ports:
-      - "${DB_PORT}:5432"
-      # command: ["postgres", "-c", "log_statement=all"]
+      - "${DB_PORT:-5432}:5432"
+    # command: ["postgres", "-c", "log_statement=all"]
     shm_size: 1gb
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  squid:
+    build: .
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+    env_file:
+      - .env
+    restart: unless-stopped
+
+volumes:
+  db_data:
