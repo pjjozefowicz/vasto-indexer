@@ -2,7 +2,7 @@
 
 A Squid indexer that tracks bonding curve transactions and VST token pricing. The squid fetches historical events from both the bonding curve contract and LP contract, decodes them, and persists transaction data and VST price information to the database.
 
-Dependencies: NodeJS v16 or newer, Git, Docker.
+Dependencies: NodeJS v20 or newer, Git, Docker.
 
 ## Local setup
 
@@ -19,7 +19,9 @@ The Squid CLI uses the `sqd` command and is intended for local development. It r
 - `LP_ADDRESS` - The VST/USDC LP contract address
 - `BONDING_CURVE_ADDRES` - The bonding curve contract address
 - `FROM_BLOCK` - Starting block number for indexing
+- `GATEWAY_URL` - Archive gateway url
 - `RPC_ENDPOINT` - Arbitrum RPC endpoint for fetching blockchain data
+- `RPC_RATE_LIMIT` - Maximum number of RPC requests per second
 
 ### Run locally with Squid CLI
 
@@ -32,6 +34,8 @@ sqd build
 # start the squid processor
 sqd process
 ```
+
+For more information about the development flow, see the [documentation](https://docs.sqd.ai/sdk/how-to-start/squid-from-scratch/).
 
 ### Run with Docker Compose
 
