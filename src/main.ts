@@ -6,6 +6,9 @@ import * as lp from "./abi/lp";
 import { BondingCurveTransaction, VSTPrice, TransactionType } from "./model";
 import { LP_ADDRESS, BONDING_CURVE_ADDRES, processor } from "./processor";
 
+let latestVSTPrice: VSTPrice | undefined;
+let isInitialized = false;
+
 processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
   let bondingCurveTransactions: BondingCurveTransaction[] = [];
   let vstPrices: VSTPrice[] = [];
@@ -13,28 +16,38 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
   const USDC_DECIMALS = 6;
   const VST_DECIMALS = 18;
 
+  // Initialize latest price only once when indexer starts
+  if (!isInitialized) {
+    const prices = await ctx.store.find(VSTPrice, {
+      order: { timestamp: "DESC" },
+      take: 1,
+    });
+    latestVSTPrice = prices.length > 0 ? prices[0] : undefined;
+    isInitialized = true;
+  }
+
   for (let block of ctx.blocks) {
     for (let log of block.logs) {
       if (ethers.getAddress(log.address) === LP_ADDRESS) {
         if (log.topics[0] === lp.events.Sync.topic) {
           let event = lp.events.Sync.decode(log);
-
           const usdcAmount = Number(event.reserve0) / 10 ** USDC_DECIMALS;
           const vstAmount = Number(event.reserve1) / 10 ** VST_DECIMALS;
           const priceUSD =
             vstAmount > 0 ? BigDecimal(usdcAmount / vstAmount) : BigDecimal(0);
 
-          vstPrices.push(
-            new VSTPrice({
-              id: log.id,
-              blockNumber: log.transaction?.block.height || 0,
-              timestamp: new Date(log.transaction?.block.timestamp || 0),
-              txHash: log.transaction?.hash || "0x",
-              reserveUSDC: event.reserve0,
-              reserveVST: event.reserve1,
-              priceUSD: priceUSD,
-            })
-          );
+          const vstPrice = new VSTPrice({
+            id: log.id,
+            blockNumber: log.transaction?.block.height || 0,
+            timestamp: new Date(log.transaction?.block.timestamp || 0),
+            txHash: log.transaction?.hash || "0x",
+            reserveUSDC: event.reserve0,
+            reserveVST: event.reserve1,
+            priceUSD: priceUSD,
+          });
+
+          vstPrices.push(vstPrice);
+          latestVSTPrice = vstPrice;
         }
       }
 
@@ -56,6 +69,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
               currentCost: event.currentCost,
               eventTimestamp: event.timestamp,
               taxPaid: null,
+              vstPrice: latestVSTPrice,
             })
           );
         }
@@ -77,6 +91,7 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
               currentCost: event.currentCost,
               eventTimestamp: event.timestamp,
               taxPaid: event.taxPaid,
+              vstPrice: latestVSTPrice,
             })
           );
         }
@@ -84,6 +99,6 @@ processor.run(new TypeormDatabase({ supportHotBlocks: true }), async (ctx) => {
     }
   }
 
-  await ctx.store.insert(bondingCurveTransactions);
   await ctx.store.insert(vstPrices);
+  await ctx.store.insert(bondingCurveTransactions);
 });

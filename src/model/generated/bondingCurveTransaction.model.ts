@@ -1,5 +1,6 @@
-import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_} from "@subsquid/typeorm-store"
+import {Entity as Entity_, Column as Column_, PrimaryColumn as PrimaryColumn_, IntColumn as IntColumn_, DateTimeColumn as DateTimeColumn_, StringColumn as StringColumn_, BigIntColumn as BigIntColumn_, ManyToOne as ManyToOne_, Index as Index_} from "@subsquid/typeorm-store"
 import {TransactionType} from "./_transactionType"
+import {VSTPrice} from "./vstPrice.model"
 
 @Entity_()
 export class BondingCurveTransaction {
@@ -42,4 +43,8 @@ export class BondingCurveTransaction {
 
     @BigIntColumn_({nullable: true})
     taxPaid!: bigint | undefined | null
+
+    @Index_()
+    @ManyToOne_(() => VSTPrice, {nullable: true})
+    vstPrice!: VSTPrice | undefined | null
 }

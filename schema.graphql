@@ -11,6 +11,7 @@ type BondingCurveTransaction @entity {
   currentCost: BigInt!
   eventTimestamp: BigInt!
   taxPaid: BigInt # only for sells
+  vstPrice: VSTPrice
 }
 
 enum TransactionType {
@@ -26,4 +27,6 @@ type VSTPrice @entity {
   reserveUSDC: BigInt!
   reserveVST: BigInt!
   priceUSD: BigDecimal
+  bondingCurveTransactions: [BondingCurveTransaction!]
+    @derivedFrom(field: "vstPrice")
 }

@@ -19,16 +19,19 @@ export const BONDING_CURVE_ADDRES = ethers.getAddress(
   assertNotNull(process.env.BONDING_CURVE_ADDRES)
 );
 export const FROM_BLOCK = parseInt(assertNotNull(process.env.FROM_BLOCK));
+export const RPC_RATE_LIMIT = parseInt(
+  assertNotNull(process.env.RPC_RATE_LIMIT)
+);
 
 export const processor = new EvmBatchProcessor()
-  .setGateway("https://v2.archive.subsquid.io/network/arbitrum-one")
+  .setGateway(assertNotNull(process.env.GATEWAY_URL))
   // Chain RPC endpoint is required for
   //  - indexing unfinalized blocks https://docs.subsquid.io/basics/unfinalized-blocks/
   //  - querying the contract state https://docs.subsquid.io/evm-indexing/query-state/
   .setRpcEndpoint({
     url: assertNotNull(process.env.RPC_ENDPOINT),
     // More RPC connection options at https://docs.subsquid.io/evm-indexing/configuration/initialization/#set-data-source
-    rateLimit: 10,
+    rateLimit: RPC_RATE_LIMIT,
   })
   .setRpcDataIngestionSettings({
     disabled: false,
